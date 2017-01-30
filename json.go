@@ -54,13 +54,15 @@ func Protect(handler http.HandlerFunc) http.HandlerFunc {
 }
 
 // MakeJSONAPI creates an HTTP handler which always responds to incoming requests with JSON responses.
+// Incoming http.Requests will have a logger (with a request ID/method/path logged) attached to the Context.
+// This can be accessed via the const CtxValueLogger. The type of the logger is *log.Entry from github.com/Sirupsen/logrus
 func MakeJSONAPI(handler JSONRequestHandler) http.HandlerFunc {
 	return Protect(func(w http.ResponseWriter, req *http.Request) {
 		// Set a Logger on the context
 		ctx := context.WithValue(req.Context(), CtxValueLogger, log.WithFields(log.Fields{
-			"method": req.Method,
-			"path":   req.URL.Path,
-			"id":     RandomString(12),
+			"req.method": req.Method,
+			"req.path":   req.URL.Path,
+			"req.id":     RandomString(12),
 		}))
 		req = req.WithContext(ctx)
 
