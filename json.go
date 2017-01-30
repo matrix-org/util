@@ -11,8 +11,11 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+// ContextKeys is a type alias for string to namespace Context keys per-package.
+type ContextKeys string
+
 // CtxValueLogger is the key to extract the logrus Logger.
-var CtxValueLogger = "logger"
+const CtxValueLogger = ContextKeys("logger")
 
 // JSONRequestHandler represents an interface that must be satisfied in order to respond to incoming
 // HTTP requests with JSON. The interface returned will be marshalled into JSON to be sent to the client,
@@ -93,7 +96,7 @@ func MakeJSONAPI(handler JSONRequestHandler) http.HandlerFunc {
 }
 
 func jsonErrorResponse(w http.ResponseWriter, req *http.Request, httpErr *HTTPError) {
-	logger := req.Context().Value("logger").(*log.Entry)
+	logger := req.Context().Value(CtxValueLogger).(*log.Entry)
 	if httpErr.Code == 302 {
 		logger.WithField("err", httpErr.Error()).Print("Redirecting")
 		http.Redirect(w, req, httpErr.Message, 302)
@@ -127,7 +130,7 @@ func SetCORSHeaders(w http.ResponseWriter) {
 
 const alphanumerics = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-// Generate a pseudo-random string of length n.
+// RandomString generates a pseudo-random string of length n.
 func RandomString(n int) string {
 	b := make([]byte, n)
 	for i := range b {
