@@ -123,6 +123,18 @@ func jsonErrorResponse(w http.ResponseWriter, req *http.Request, httpErr *HTTPEr
 	w.Write(r)
 }
 
+// WithCORSOptions intercepts all OPTIONS requests and responds with CORS headers. The request handler
+// is not invoked when this happens.
+func WithCORSOptions(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		if req.Method == "OPTIONS" {
+			SetCORSHeaders(w)
+			return
+		}
+		handler(w, req)
+	}
+}
+
 // SetCORSHeaders sets unrestricted origin Access-Control headers on the response writer
 func SetCORSHeaders(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
