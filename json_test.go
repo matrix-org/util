@@ -73,6 +73,24 @@ func TestMakeJSONAPIRedirect(t *testing.T) {
 	}
 }
 
+func TestGetLogger(t *testing.T) {
+	log.SetLevel(log.PanicLevel) // suppress logs in test output
+	entry := log.WithField("test", "yep")
+	mockReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
+	ctx := context.WithValue(mockReq.Context(), CtxValueLogger, entry)
+	mockReq = mockReq.WithContext(ctx)
+	ctxLogger := GetLogger(mockReq.Context())
+	if ctxLogger != entry {
+		t.Errorf("TestGetLogger wanted logger '%s', got '%s'", entry, ctxLogger)
+	}
+
+	noLoggerInReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
+	ctxLogger = GetLogger(noLoggerInReq.Context())
+	if ctxLogger != nil {
+		t.Errorf("TestGetLogger wanted nil logger, got '%s'", ctxLogger)
+	}
+}
+
 func TestProtect(t *testing.T) {
 	log.SetLevel(log.PanicLevel) // suppress logs in test output
 	mockWriter := httptest.NewRecorder()
