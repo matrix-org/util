@@ -18,6 +18,15 @@ type ContextKeys string
 // CtxValueLogger is the key to extract the logrus Logger.
 const CtxValueLogger = ContextKeys("logger")
 
+// GetLogger retrieves the logrus logger from the supplied context. Returns nil if there is no logger.
+func GetLogger(ctx context.Context) *log.Entry {
+	l := ctx.Value(CtxValueLogger)
+	if l == nil {
+		return nil
+	}
+	return l.(*log.Entry)
+}
+
 // JSONRequestHandler represents an interface that must be satisfied in order to respond to incoming
 // HTTP requests with JSON. The interface returned will be marshalled into JSON to be sent to the client,
 // unless the interface is []byte in which case the bytes are sent to the client unchanged.
