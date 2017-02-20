@@ -77,7 +77,7 @@ func TestGetLogger(t *testing.T) {
 	log.SetLevel(log.PanicLevel) // suppress logs in test output
 	entry := log.WithField("test", "yep")
 	mockReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
-	ctx := context.WithValue(mockReq.Context(), CtxValueLogger, entry)
+	ctx := context.WithValue(mockReq.Context(), ctxValueLogger, entry)
 	mockReq = mockReq.WithContext(ctx)
 	ctxLogger := GetLogger(mockReq.Context())
 	if ctxLogger != entry {
@@ -96,7 +96,7 @@ func TestProtect(t *testing.T) {
 	mockWriter := httptest.NewRecorder()
 	mockReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
 	mockReq = mockReq.WithContext(
-		context.WithValue(mockReq.Context(), CtxValueLogger, log.WithField("test", "yep")),
+		context.WithValue(mockReq.Context(), ctxValueLogger, log.WithField("test", "yep")),
 	)
 	h := Protect(func(w http.ResponseWriter, req *http.Request) {
 		panic("oh noes!")
