@@ -15,6 +15,19 @@ import (
 // contextKeys is a type alias for string to namespace Context keys per-package.
 type contextKeys string
 
+// ctxValueRequestID is the key to extract the request ID for an HTTP request
+const ctxValueRequestID = contextKeys("requestid")
+
+// GetRequestID returns the request ID associated with this context, or the empty string
+// if one is not associated with this context.
+func GetRequestID(ctx context.Context) string {
+	id := ctx.Value(ctxValueRequestID)
+	if id == nil {
+		return ""
+	}
+	return id.(string)
+}
+
 // ctxValueLogger is the key to extract the logrus Logger.
 const ctxValueLogger = contextKeys("logger")
 
@@ -68,12 +81,14 @@ func Protect(handler http.HandlerFunc) http.HandlerFunc {
 // This can be accessed via GetLogger(Context). The type of the logger is *log.Entry from github.com/Sirupsen/logrus
 func MakeJSONAPI(handler JSONRequestHandler) http.HandlerFunc {
 	return Protect(func(w http.ResponseWriter, req *http.Request) {
+		reqID := RandomString(12)
 		// Set a Logger on the context
 		ctx := context.WithValue(req.Context(), ctxValueLogger, log.WithFields(log.Fields{
 			"req.method": req.Method,
 			"req.path":   req.URL.Path,
-			"req.id":     RandomString(12),
+			"req.id":     reqID,
 		}))
+		ctx = context.WithValue(ctx, ctxValueRequestID, reqID)
 		req = req.WithContext(ctx)
 
 		logger := req.Context().Value(ctxValueLogger).(*log.Entry)
