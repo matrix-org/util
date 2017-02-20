@@ -12,11 +12,11 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-// ContextKeys is a type alias for string to namespace Context keys per-package.
-type ContextKeys string
+// contextKeys is a type alias for string to namespace Context keys per-package.
+type contextKeys string
 
 // ctxValueLogger is the key to extract the logrus Logger.
-const ctxValueLogger = ContextKeys("logger")
+const ctxValueLogger = contextKeys("logger")
 
 // GetLogger retrieves the logrus logger from the supplied context. Returns nil if there is no logger.
 func GetLogger(ctx context.Context) *log.Entry {
