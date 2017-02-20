@@ -98,7 +98,7 @@ func TestProtect(t *testing.T) {
 	}
 }
 
-func TestAccessRequestID(t *testing.T) {
+func TestGetRequestID(t *testing.T) {
 	log.SetLevel(log.PanicLevel) // suppress logs in test output
 	reqID := "alphabetsoup"
 	mockReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
@@ -106,6 +106,12 @@ func TestAccessRequestID(t *testing.T) {
 	mockReq = mockReq.WithContext(ctx)
 	ctxReqID := GetRequestID(mockReq.Context())
 	if reqID != ctxReqID {
-		t.Errorf("TestAccessRequestID wanted request ID '%s', got '%s'", reqID, ctxReqID)
+		t.Errorf("TestGetRequestID wanted request ID '%s', got '%s'", reqID, ctxReqID)
+	}
+
+	noReqIDInReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
+	ctxReqID = GetRequestID(noReqIDInReq.Context())
+	if ctxReqID != "" {
+		t.Errorf("TestGetRequestID wanted empty request ID, got '%s'", ctxReqID)
 	}
 }
