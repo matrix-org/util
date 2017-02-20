@@ -81,13 +81,13 @@ func TestGetLogger(t *testing.T) {
 	mockReq = mockReq.WithContext(ctx)
 	ctxLogger := GetLogger(mockReq.Context())
 	if ctxLogger != entry {
-		t.Errorf("TestGetLogger wanted logger '%s', got '%s'", entry, ctxLogger)
+		t.Errorf("TestGetLogger wanted logger '%v', got '%v'", entry, ctxLogger)
 	}
 
 	noLoggerInReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
 	ctxLogger = GetLogger(noLoggerInReq.Context())
 	if ctxLogger != nil {
-		t.Errorf("TestGetLogger wanted nil logger, got '%s'", ctxLogger)
+		t.Errorf("TestGetLogger wanted nil logger, got '%v'", ctxLogger)
 	}
 }
 
