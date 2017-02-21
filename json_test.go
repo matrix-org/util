@@ -35,6 +35,10 @@ func TestMakeJSONAPI(t *testing.T) {
 		{nil, &HTTPError{nil, "Everything is broken", 500, struct {
 			Foo string `json:"foo"`
 		}{"yep"}}, 500, `{"foo":"yep"}`},
+		// Error JSON return values which fail to be marshalled should fallback to text
+		{nil, &HTTPError{nil, "Everything is broken", 500, struct {
+			Foo interface{} `json:"foo"`
+		}{func(cannotBe, marshalled string) {}}}, 500, `{"message":"Everything is broken"}`},
 		// With different status codes
 		{nil, &HTTPError{nil, "Not here", 404, nil}, 404, `{"message":"Not here"}`},
 		// Success return values
