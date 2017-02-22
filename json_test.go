@@ -10,10 +10,10 @@ import (
 )
 
 type MockJSONRequestHandler struct {
-	handler func(req *http.Request) (interface{}, *HTTPError)
+	handler func(req *http.Request) JSONResponse
 }
 
-func (h *MockJSONRequestHandler) OnIncomingRequest(req *http.Request) (interface{}, *HTTPError) {
+func (h *MockJSONRequestHandler) OnIncomingRequest(req *http.Request) JSONResponse {
 	return h.handler(req)
 }
 
@@ -24,36 +24,27 @@ type MockResponse struct {
 func TestMakeJSONAPI(t *testing.T) {
 	log.SetLevel(log.PanicLevel) // suppress logs in test output
 	tests := []struct {
-		Return     interface{}
-		Err        *HTTPError
+		Return     JSONResponse
 		ExpectCode int
 		ExpectJSON string
 	}{
-		// Error message return values
-		{nil, &HTTPError{nil, "Everything is broken", 500, nil}, 500, `{"message":"Everything is broken"}`},
-		// Error JSON return values
-		{nil, &HTTPError{nil, "Everything is broken", 500, struct {
-			Foo string `json:"foo"`
-		}{"yep"}}, 500, `{"foo":"yep"}`},
+		// MessageResponse return values
+		{MessageResponse(500, "Everything is broken"), 500, `{"message":"Everything is broken"}`},
+		// interface return values
+		{JSONResponse{500, MockResponse{"yep"}, nil}, 500, `{"foo":"yep"}`},
 		// Error JSON return values which fail to be marshalled should fallback to text
-		{nil, &HTTPError{nil, "Everything is broken", 500, struct {
+		{JSONResponse{500, struct {
 			Foo interface{} `json:"foo"`
-		}{func(cannotBe, marshalled string) {}}}, 500, `{"message":"Everything is broken"}`},
+		}{func(cannotBe, marshalled string) {}}, nil}, 500, `{"message":"Internal Server Error"}`},
 		// With different status codes
-		{nil, &HTTPError{nil, "Not here", 404, nil}, 404, `{"message":"Not here"}`},
-		// Success return values
-		{&MockResponse{"yep"}, nil, 200, `{"foo":"yep"}`},
+		{JSONResponse{201, MockResponse{"narp"}, nil}, 201, `{"foo":"narp"}`},
 		// Top-level array success values
-		{[]MockResponse{{"yep"}, {"narp"}}, nil, 200, `[{"foo":"yep"},{"foo":"narp"}]`},
-		// raw []byte escape hatch
-		{[]byte(`actually bytes`), nil, 200, `actually bytes`},
-		// impossible marshal
-		{func(cannotBe, marshalled string) {}, nil, 500, `{"message":"Failed to serialise response as JSON"}`},
+		{JSONResponse{200, []MockResponse{{"yep"}, {"narp"}}, nil}, 200, `[{"foo":"yep"},{"foo":"narp"}]`},
 	}
 
 	for _, tst := range tests {
-		mock := MockJSONRequestHandler{func(req *http.Request) (interface{}, *HTTPError) {
-			return tst.Return, tst.Err
+		mock := MockJSONRequestHandler{func(req *http.Request) JSONResponse {
+			return tst.Return
 		}}
 		mockReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
 		mockWriter := httptest.NewRecorder()
@@ -69,10 +60,38 @@ func TestMakeJSONAPI(t *testing.T) {
 	}
 }
 
+func TestMakeJSONAPICustomHeaders(t *testing.T) {
+	mock := MockJSONRequestHandler{func(req *http.Request) JSONResponse {
+		headers := make(map[string]string)
+		headers["Custom"] = "Thing"
+		headers["X-Custom"] = "Things"
+		return JSONResponse{
+			Code:    200,
+			JSON:    MockResponse{"yep"},
+			Headers: headers,
+		}
+	}}
+	mockReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
+	mockWriter := httptest.NewRecorder()
+	handlerFunc := MakeJSONAPI(&mock)
+	handlerFunc(mockWriter, mockReq)
+	if mockWriter.Code != 200 {
+		t.Errorf("TestMakeJSONAPICustomHeaders wanted HTTP status 200, got %d", mockWriter.Code)
+	}
+	h := mockWriter.Header().Get("Custom")
+	if h != "Thing" {
+		t.Errorf("TestMakeJSONAPICustomHeaders wanted header 'Custom: Thing' , got 'Custom: %s'", h)
+	}
+	h = mockWriter.Header().Get("X-Custom")
+	if h != "Things" {
+		t.Errorf("TestMakeJSONAPICustomHeaders wanted header 'X-Custom: Things' , got 'X-Custom: %s'", h)
+	}
+}
+
 func TestMakeJSONAPIRedirect(t *testing.T) {
 	log.SetLevel(log.PanicLevel) // suppress logs in test output
-	mock := MockJSONRequestHandler{func(req *http.Request) (interface{}, *HTTPError) {
-		return nil, &HTTPError{nil, "https://matrix.org", 302, nil}
+	mock := MockJSONRequestHandler{func(req *http.Request) JSONResponse {
+		return RedirectResponse("https://matrix.org")
 	}}
 	mockReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
 	mockWriter := httptest.NewRecorder()
