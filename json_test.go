@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -106,6 +107,26 @@ func TestMakeJSONAPIRedirect(t *testing.T) {
 	}
 }
 
+func TestMakeJSONAPIError(t *testing.T) {
+	log.SetLevel(log.PanicLevel) // suppress logs in test output
+	mock := MockJSONRequestHandler{func(req *http.Request) JSONResponse {
+		err := errors.New("oops")
+		return ErrorResponse(err)
+	}}
+	mockReq, _ := http.NewRequest("GET", "http://example.com/foo", nil)
+	mockWriter := httptest.NewRecorder()
+	handlerFunc := MakeJSONAPI(&mock)
+	handlerFunc(mockWriter, mockReq)
+	if mockWriter.Code != 500 {
+		t.Errorf("TestMakeJSONAPIError wanted HTTP status 500, got %d", mockWriter.Code)
+	}
+	actualBody := mockWriter.Body.String()
+	expect := `{"message":"oops"}`
+	if actualBody != expect {
+		t.Errorf("TestMakeJSONAPIError wanted body '%s', got '%s'", expect, actualBody)
+	}
+}
+
 func TestGetLogger(t *testing.T) {
 	log.SetLevel(log.PanicLevel) // suppress logs in test output
 	entry := log.WithField("test", "yep")
@@ -146,6 +167,32 @@ func TestProtect(t *testing.T) {
 	actualBody := mockWriter.Body.String()
 	if actualBody != expectBody {
 		t.Errorf("TestProtect wanted body %s, got %s", expectBody, actualBody)
+	}
+}
+
+func TestWithCORSOptions(t *testing.T) {
+	log.SetLevel(log.PanicLevel) // suppress logs in test output
+	mockWriter := httptest.NewRecorder()
+	mockReq, _ := http.NewRequest("OPTIONS", "http://example.com/foo", nil)
+	h := WithCORSOptions(func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(200)
+		w.Write([]byte("yep"))
+	})
+	h(mockWriter, mockReq)
+	if mockWriter.Code != 200 {
+		t.Errorf("TestWithCORSOptions wanted HTTP status 200, got %d", mockWriter.Code)
+	}
+
+	origin := mockWriter.Header().Get("Access-Control-Allow-Origin")
+	if origin != "*" {
+		t.Errorf("TestWithCORSOptions wanted Access-Control-Allow-Origin header '*', got '%s'", origin)
+	}
+
+	// OPTIONS request shouldn't hit the handler func
+	expectBody := ""
+	actualBody := mockWriter.Body.String()
+	if actualBody != expectBody {
+		t.Errorf("TestWithCORSOptions wanted body %s, got %s", expectBody, actualBody)
 	}
 }
 
