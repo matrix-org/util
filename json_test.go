@@ -127,6 +127,30 @@ func TestMakeJSONAPIError(t *testing.T) {
 	}
 }
 
+func TestIs2xx(t *testing.T) {
+	tests := []struct {
+		Code   int
+		Expect bool
+	}{
+		{200, true},
+		{201, true},
+		{299, true},
+		{300, false},
+		{199, false},
+		{0, false},
+		{500, false},
+	}
+	for _, test := range tests {
+		j := JSONResponse{
+			Code: test.Code,
+		}
+		actual := j.Is2xx()
+		if actual != test.Expect {
+			t.Errorf("TestIs2xx wanted %t, got %t", test.Expect, actual)
+		}
+	}
+}
+
 func TestGetLogger(t *testing.T) {
 	log.SetLevel(log.PanicLevel) // suppress logs in test output
 	entry := log.WithField("test", "yep")

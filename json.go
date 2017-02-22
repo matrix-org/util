@@ -21,6 +21,11 @@ type JSONResponse struct {
 	Headers map[string]string
 }
 
+// Is2xx returns true if the Code is between 200 and 299.
+func (r JSONResponse) Is2xx() bool {
+	return r.Code/100 == 2
+}
+
 // RedirectResponse returns a JSONResponse which 302s the client to the given location.
 func RedirectResponse(location string) JSONResponse {
 	headers := make(map[string]string)
