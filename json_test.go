@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"net/http"
@@ -20,6 +21,18 @@ func (h *MockJSONRequestHandler) OnIncomingRequest(req *http.Request) JSONRespon
 
 type MockResponse struct {
 	Foo string `json:"foo"`
+}
+
+func TestUnmarshalJSONRequest(t *testing.T) {
+	req := httptest.NewRequest("PUT", "http://localhost", bytes.NewBufferString(`{"foo":"hello"}`))
+	var i MockResponse
+	if err := UnmarshalJSONRequest(req, &i); err != nil {
+		t.Fatalf("TestUnmarshalJSONRequest expect no error, got %s", err)
+	}
+	want := "hello"
+	if i.Foo != want {
+		t.Fatalf("TestUnmarshalJSONRequest wanted %s, got %s", want, i.Foo)
+	}
 }
 
 func TestMakeJSONAPI(t *testing.T) {
