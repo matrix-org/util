@@ -33,6 +33,12 @@ func TestUnmarshalJSONRequest(t *testing.T) {
 	if i.Foo != want {
 		t.Fatalf("TestUnmarshalJSONRequest wanted %s, got %s", want, i.Foo)
 	}
+
+	// test error case
+	req = httptest.NewRequest("PUT", "http://localhost", bytes.NewBufferString(`{"foo":"incomplete_json"`))
+	if err := UnmarshalJSONRequest(req, &i); err == nil {
+		t.Fatalf("TestUnmarshalJSONRequest wanted error, got nil")
+	}
 }
 
 func TestMakeJSONAPI(t *testing.T) {
