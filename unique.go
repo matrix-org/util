@@ -8,7 +8,7 @@ import (
 // Unique removes duplicate items from a sorted list in place.
 // Takes the same interface as sort.Sort
 // Returns the length of the data without duplicates
-// Uses the last occurance of a duplicate.
+// Uses the last occurrence of a duplicate.
 // O(n).
 func Unique(data sort.Interface) int {
 	if !sort.IsSorted(data) {
@@ -26,7 +26,7 @@ func Unique(data sort.Interface) int {
 		// not equal. Otherwise they must be equal because the list is sorted.
 		// If they are equal then we move onto the next element.
 		if data.Less(i-1, i) {
-			// "Write" the previous element to the output position by swaping
+			// "Write" the previous element to the output position by swapping
 			// the elements.
 			// Note that if the list has no duplicates then i-1 == j so the
 			// swap does nothing. (This assumes that data.Swap(a,b) nops if a==b)
@@ -43,7 +43,7 @@ func Unique(data sort.Interface) int {
 // SortAndUnique sorts a list and removes duplicate entries in place.
 // Takes the same interface as sort.Sort
 // Returns the length of the data without duplicates
-// Uses the last occurance of a duplicate.
+// Uses the last occurrence of a duplicate.
 // O(nlog(n))
 func SortAndUnique(data sort.Interface) int {
 	sort.Sort(data)
