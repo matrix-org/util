@@ -151,6 +151,14 @@ func respond(w http.ResponseWriter, req *http.Request, res JSONResponse) {
 	w.Write(resBytes)
 }
 
+// UnmarshalJSONRequest into the given interface. Returns an error if failed to unmarshal. Calling
+// this function will consume the request body and close it.
+func UnmarshalJSONRequest(req *http.Request, iface interface{}) (err error) {
+	defer req.Body.Close()
+	err = json.NewDecoder(req.Body).Decode(iface)
+	return
+}
+
 // WithCORSOptions intercepts all OPTIONS requests and responds with CORS headers. The request handler
 // is not invoked when this happens.
 func WithCORSOptions(handler http.HandlerFunc) http.HandlerFunc {
