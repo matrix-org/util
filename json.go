@@ -93,10 +93,10 @@ func Protect(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// WrapJSONRequestHandlerFunc sets up an HTTP handler for use with JSON APIs with standard logging.
+// SetupRequestLogging sets up standard logging for http.Requests.
 // http.Requests will have a logger (with a request ID/method/path logged) attached to the Context.
 // This can be accessed via GetLogger(Context).
-func WrapJSONRequestHandlerFunc(w http.ResponseWriter, req *http.Request) {
+func SetupRequestLogging(req *http.Request) {
 	reqID := RandomString(12)
 	// Set a Logger and request ID on the context
 	ctx := context.WithValue(req.Context(), ctxValueLogger, log.WithFields(log.Fields{
@@ -109,16 +109,6 @@ func WrapJSONRequestHandlerFunc(w http.ResponseWriter, req *http.Request) {
 
 	logger := GetLogger(req.Context())
 	logger.Print("Incoming request")
-
-	if req.Method == "OPTIONS" {
-		SetCORSHeaders(w)
-		w.WriteHeader(200)
-		return
-	}
-
-	// Set common headers returned regardless of the outcome of the request
-	w.Header().Set("Content-Type", "application/json")
-	SetCORSHeaders(w)
 }
 
 // MakeJSONAPI creates an HTTP handler which always responds to incoming requests with JSON responses.
@@ -126,8 +116,19 @@ func WrapJSONRequestHandlerFunc(w http.ResponseWriter, req *http.Request) {
 // This can be accessed via GetLogger(Context).
 func MakeJSONAPI(handler JSONRequestHandler) http.HandlerFunc {
 	return Protect(func(w http.ResponseWriter, req *http.Request) {
-		WrapJSONRequestHandlerFunc(w, req)
+		SetupRequestLogging(req)
+
+		if req.Method == "OPTIONS" {
+			SetCORSHeaders(w)
+			w.WriteHeader(200)
+			return
+		}
 		res := handler.OnIncomingRequest(req)
+
+		// Set common headers returned regardless of the outcome of the request
+		w.Header().Set("Content-Type", "application/json")
+		SetCORSHeaders(w)
+
 		respond(w, req, res)
 	})
 }
