@@ -93,35 +93,41 @@ func Protect(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// WrapJSONRequestHandlerFunc sets up an HTTP handler for use with JSON APIs with standard logging.
+// http.Requests will have a logger (with a request ID/method/path logged) attached to the Context.
+// This can be accessed via GetLogger(Context).
+func WrapJSONRequestHandlerFunc(w http.ResponseWriter, req *http.Request) {
+	reqID := RandomString(12)
+	// Set a Logger and request ID on the context
+	ctx := context.WithValue(req.Context(), ctxValueLogger, log.WithFields(log.Fields{
+		"req.method": req.Method,
+		"req.path":   req.URL.Path,
+		"req.id":     reqID,
+	}))
+	ctx = context.WithValue(ctx, ctxValueRequestID, reqID)
+	req = req.WithContext(ctx)
+
+	logger := GetLogger(req.Context())
+	logger.Print("Incoming request")
+
+	if req.Method == "OPTIONS" {
+		SetCORSHeaders(w)
+		w.WriteHeader(200)
+		return
+	}
+
+	// Set common headers returned regardless of the outcome of the request
+	w.Header().Set("Content-Type", "application/json")
+	SetCORSHeaders(w)
+}
+
 // MakeJSONAPI creates an HTTP handler which always responds to incoming requests with JSON responses.
 // Incoming http.Requests will have a logger (with a request ID/method/path logged) attached to the Context.
 // This can be accessed via GetLogger(Context).
 func MakeJSONAPI(handler JSONRequestHandler) http.HandlerFunc {
 	return Protect(func(w http.ResponseWriter, req *http.Request) {
-		reqID := RandomString(12)
-		// Set a Logger and request ID on the context
-		ctx := context.WithValue(req.Context(), ctxValueLogger, log.WithFields(log.Fields{
-			"req.method": req.Method,
-			"req.path":   req.URL.Path,
-			"req.id":     reqID,
-		}))
-		ctx = context.WithValue(ctx, ctxValueRequestID, reqID)
-		req = req.WithContext(ctx)
-
-		logger := GetLogger(req.Context())
-		logger.Print("Incoming request")
-
-		if req.Method == "OPTIONS" {
-			SetCORSHeaders(w)
-			w.WriteHeader(200)
-			return
-		}
+		WrapJSONRequestHandlerFunc(w, req)
 		res := handler.OnIncomingRequest(req)
-
-		// Set common headers returned regardless of the outcome of the request
-		w.Header().Set("Content-Type", "application/json")
-		SetCORSHeaders(w)
-
 		respond(w, req, res)
 	})
 }
