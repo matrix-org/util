@@ -3,7 +3,7 @@ package util
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 )
 
 // contextKeys is a type alias for string to namespace Context keys per-package.
@@ -34,4 +34,9 @@ func GetLogger(ctx context.Context) *log.Entry {
 		return log.WithField("context", "missing")
 	}
 	return l.(*log.Entry)
+}
+
+// ContextWithLogger creates a new context, which will use the given logger.
+func ContextWithLogger(ctx context.Context, l *log.Entry) context.Context {
+	return context.WithValue(ctx, ctxValueLogger, l)
 }
