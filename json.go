@@ -174,7 +174,9 @@ func WithCORSOptions(handler http.HandlerFunc) http.HandlerFunc {
 
 // SetCORSHeaders sets unrestricted origin Access-Control headers on the response writer
 func SetCORSHeaders(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if w.Header().Get("Access-Control-Allow-Origin") == "" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	}
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
 }
