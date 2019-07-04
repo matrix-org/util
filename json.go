@@ -52,6 +52,17 @@ func ErrorResponse(err error) JSONResponse {
 	return MessageResponse(500, err.Error())
 }
 
+// Error Responses in the standard Matrix Error format (errcode / error)
+func MatrixErrorResponse(httpStatusCode int, errCode, message string) *JSONResponse {
+	return &JSONResponse{
+		Code: httpStatusCode,
+		JSON: struct {
+			ErrCode string `json:"errcode"`
+			Error string `json:"error"`
+		}{errCode, message},
+	}
+}
+
 // JSONRequestHandler represents an interface that must be satisfied in order to respond to incoming
 // HTTP requests with JSON.
 type JSONRequestHandler interface {
