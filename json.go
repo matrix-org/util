@@ -52,9 +52,9 @@ func ErrorResponse(err error) JSONResponse {
 	return MessageResponse(500, err.Error())
 }
 
-// Error Responses in the standard Matrix Error format (errcode / error)
-func MatrixErrorResponse(httpStatusCode int, errCode, message string) *JSONResponse {
-	return &JSONResponse{
+// MatrixErrorResponse is a function that returns error responses in the standard Matrix Error format (errcode / error)
+func MatrixErrorResponse(httpStatusCode int, errCode, message string) JSONResponse {
+	return JSONResponse{
 		Code: httpStatusCode,
 		JSON: struct {
 			ErrCode string `json:"errcode"`
