@@ -5,3 +5,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/matrix-org/util/badge.svg)](https://coveralls.io/github/matrix-org/util)
 
 A loose collection of Golang functions that we use at matrix.org 
+
+This repository makes use of Go Modules and thus requires at least Go 1.11+.
