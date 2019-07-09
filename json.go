@@ -58,7 +58,7 @@ func MatrixErrorResponse(httpStatusCode int, errCode, message string) JSONRespon
 		Code: httpStatusCode,
 		JSON: struct {
 			ErrCode string `json:"errcode"`
-			Error string `json:"error"`
+			Error   string `json:"error"`
 		}{errCode, message},
 	}
 }
