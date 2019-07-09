@@ -1,6 +1,6 @@
 steps:
   - command:
-    - "go build ./..."
+      - "go build ./..."
     label: "\U0001F528 Build / :go: 1.12"
     plugins:
       - docker#v3.0.1:
@@ -11,9 +11,9 @@ steps:
           limit: 3
 
   - command:
-    - "go get github.com/golang/lint/golint"
-    - "go get github.com/fzipp/gocyclo"
-    - "./hooks/pre-commit"
+      - "go get github.com/golang/lint/golint"
+      - "go get github.com/fzipp/gocyclo"
+      - "./hooks/pre-commit"
     label: "\U0001F9F9 Run tests and linting"
     plugins:
       - docker#v3.0.1:
@@ -24,7 +24,7 @@ steps:
           limit: 3
 
   - command:
-    - "./.buildkite/run-coverage.sh"
+      - "./.buildkite/run-coverage.sh"
     label: "\U0001F456 Computing coverage / :go: 1.12"
     plugins:
       - docker#v3.0.1:
