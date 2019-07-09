@@ -24,7 +24,6 @@ steps:
           limit: 3
 
   - command:
-      - "go get github.com/mattn/goveralls"
       - "./.buildkite/run-coverage.sh"
     label: "\U0001F456 Computing coverage / :go: 1.12"
     plugins:
