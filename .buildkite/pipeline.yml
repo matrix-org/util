@@ -4,7 +4,7 @@ steps:
     label: "\U0001F528 Build / :go: 1.12"
     plugins:
       - docker#v3.0.1:
-        image: "golang:1.12"
+          image: "golang:1.12"
     retry:
       automatic:
         - exit_status: 128
@@ -17,7 +17,7 @@ steps:
     label: "\U0001F9F9 Run tests and linting"
     plugins:
       - docker#v3.0.1:
-        image: "golang:1.12"
+          image: "golang:1.12"
     retry:
       automatic:
         - exit_status: 128
@@ -28,8 +28,8 @@ steps:
     label: "\U0001F456 Computing coverage / :go: 1.12"
     plugins:
       - docker#v3.0.1:
-        image: "golang:1.12"
-        propagate_environment: true
+          image: "golang:1.12"
+          propagate_environment: true
     retry:
       automatic:
         - exit_status: 128
