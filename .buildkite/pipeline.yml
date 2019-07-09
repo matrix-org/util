@@ -27,7 +27,7 @@ steps:
       - "./.buildkite/run-coverage.sh"
     label: "\U0001F456 Computing coverage / :go: 1.12"
     env:
-      GO111MODULE: on
+      GO111MODULE: "on"
     plugins:
       - docker#v3.0.1:
           image: "golang:1.12"
