@@ -12,7 +12,6 @@ steps:
 
   - command:
       - "go get github.com/golang/lint/golint"
-      - "go get github.com/fzipp/gocyclo"
       - "./hooks/pre-commit"
     label: "\U0001F9F9 Run tests and linting"
     plugins:
