@@ -30,6 +30,7 @@ steps:
     plugins:
       - docker#v3.0.1:
           image: "golang:1.12"
+          propagate_environment: true
     retry:
       automatic:
         - exit_status: 128
