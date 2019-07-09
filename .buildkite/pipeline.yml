@@ -31,6 +31,7 @@ steps:
       - docker#v3.0.1:
           image: "golang:1.12"
           propagate-environment: true
+          environment: ["COVERALLS_TOKEN"]
     retry:
       automatic:
         - exit_status: 128
