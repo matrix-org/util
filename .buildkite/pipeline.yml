@@ -1,6 +1,6 @@
 steps:
   - command:
-      - "go build ./..."
+      - "go build"
     label: "\U0001F528 Build / :go: 1.12"
     plugins:
       - docker#v3.0.1:
@@ -24,7 +24,7 @@ steps:
           limit: 3
 
   - command:
-      - "go build ./..."
+      - "go build"
       - "./.buildkite/run-coverage.sh"
     label: "\U0001F456 Computing coverage / :go: 1.12"
     plugins:
