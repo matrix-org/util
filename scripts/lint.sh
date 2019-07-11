@@ -2,7 +2,7 @@
 
 set -eu
 
-golint --set_exit_status
+golint -set_exit_status
 gofmt -d .
 go vet -c=5
 gocyclo -over 12 .
