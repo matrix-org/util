@@ -4,6 +4,6 @@ set -eu
 
 golint
 go fmt
-go vet --all .
+go vet .
 gocyclo -over 12 .
 go test -timeout 5s -test.v
