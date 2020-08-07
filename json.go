@@ -118,8 +118,10 @@ func RequestWithLogging(req *http.Request) *http.Request {
 	ctx = context.WithValue(ctx, ctxValueRequestID, reqID)
 	req = req.WithContext(ctx)
 
-	logger := GetLogger(req.Context())
-	logger.Print("Incoming request")
+	if req.Method != "OPTIONS" {
+		logger := GetLogger(req.Context())
+		logger.Trace("Incoming request")
+	}
 
 	return req
 }
@@ -167,7 +169,9 @@ func respond(w http.ResponseWriter, req *http.Request, res JSONResponse) {
 
 	// Set status code and write the body
 	w.WriteHeader(res.Code)
-	logger.WithField("code", res.Code).Infof("Responding (%d bytes)", len(resBytes))
+	if req.Method != "OPTIONS" {
+		logger.WithField("code", res.Code).Tracef("Responding (%d bytes)", len(resBytes))
+	}
 	w.Write(resBytes)
 }
 
