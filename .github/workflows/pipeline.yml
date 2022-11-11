@@ -16,7 +16,7 @@ jobs:
     name: "\U0001F528 Build / :go: ${{ matrix.go }}"
     strategy:
       fail-fast: false
-    matrix:
+      matrix:
         go: ["1.11", "1.12"]
     runs-on: ubuntu-latest
     steps:
