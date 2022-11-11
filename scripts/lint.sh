@@ -1,6 +1,6 @@
 #! /bin/bash
 
-set -eu
+set -eux
 
 golint -set_exit_status
 gofmt -d .
