@@ -34,7 +34,7 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: 1.12
-      - run:
-        - "go get golang.org/x/lint/golint"
-        - "go get github.com/fzipp/gocyclo"
-        - "./scripts/lint.sh"
+      - run: |-
+          go get golang.org/x/lint/golint
+          go get github.com/fzipp/gocyclo
+          ./scripts/lint.sh
