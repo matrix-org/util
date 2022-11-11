@@ -13,7 +13,7 @@ concurrency:
 jobs:
   # build with different go versions
   build:
-    name: "\U0001F528 Build / :go: ${{ matrix.go }}"
+    name: "Build & Test (Go ${{ matrix.go }})"
     strategy:
       fail-fast: false
       matrix:
@@ -24,7 +24,10 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go }}
-      - run: go build
+      - name: Build
+        run: go build
+      - name: Run tests
+        run: go test ./...
 
   # Run golangci-lint
   lint:
