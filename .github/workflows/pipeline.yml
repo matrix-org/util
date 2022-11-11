@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go: ["1.11", "1.12"]
+        go: ["1.18", "1.19"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -26,15 +26,16 @@ jobs:
           go-version: ${{ matrix.go }}
       - run: go build
 
+  # Run golangci-lint
   lint:
-    name: "\U0001F9F9 Run tests and linting"
+    timeout-minutes: 5
+    name: Linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - name: Install Go
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.12
-      - run: |-
-          go get golang.org/x/lint/golint
-          go get github.com/fzipp/gocyclo@v0.0.0-20150627053110-6acd4345c835
-          ./scripts/lint.sh
+          go-version: 1.18
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
